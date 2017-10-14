@@ -1,23 +1,35 @@
+import django_filters
 import graphene
 import json
 
+from django.contrib.auth.models import User
 from graphene_django.types import DjangoObjectType
 from graphene_django.filter.fields import DjangoFilterConnectionField
 
-from project.example_app.models import UserStatus, Genre, Author, MangaSeries
+from project.gql_platform.models import UserStatus, Genre, Author, MangaSeries
+
 
 # for clarification on the boilerplate in this file, first read graphene docs.
 # then read at docs.graphene-python.org
 # you could also read about models under django
 
 ''' Object type definitions for GraphQL server '''
+# TODO: determine if I want everything to be a node, or just certain object types
+
 class UserStatusNode(DjangoObjectType):
     class Meta:
         model = UserStatus
-        # do I need any filter fields?
-        filter_fields = {
-            'user': ['exact']
-        }
+        filter_fields = ['user', 'text', 'creation_date']
+        interfaces = (graphene.relay.Node, )
+
+class UserStatusConnection(graphene.relay.Connection):
+    class Meta:
+        node = UserStatusNode
+
+class UserNode(DjangoObjectType):
+    class Meta:
+        model = User
+        filter_fields = ['id']
         interfaces = (graphene.relay.Node, )
 
 class GenreNode(DjangoObjectType):
@@ -40,24 +52,29 @@ class MangaSeriesNode(DjangoObjectType):
         filter_fields = ['title', 'author', 'genre']
         interfaces = (graphene.relay.Node, )
 
-
 ''' Query type definition for GraphQL server '''
 class Query(graphene.ObjectType):
     # field definitions
+    current_user = graphene.Field(UserNode)
+
+    user = graphene.relay.Node.Field(UserNode)
     genre = graphene.relay.Node.Field(GenreNode)
     author = graphene.relay.Node.Field(AuthorNode)
     manga_series = graphene.relay.Node.Field(MangaSeriesNode)
 
+    all_users = DjangoFilterConnectionField(UserNode)
     all_user_statuses = DjangoFilterConnectionField(UserStatusNode)
     all_genres = DjangoFilterConnectionField(GenreNode)
     all_authors = DjangoFilterConnectionField(AuthorNode)
     all_manga_series = DjangoFilterConnectionField(MangaSeriesNode)
 
-    # field resolvers for 'connection', Relay node fields skipped since
+    # field resolvers for 'connection', Relay node fields skipped since it seems
     # DjangoFilterConnectionField and relay replace functionality
+    def resolve_current_user(self, info):
+        if not info.context.user.is_authenticated():
+            return None
+        return info.context.user
 
-    # if I add resolvers for relay node fields, they seem ineffectual. how am I
-    # supposed to add handlers for custom args?
 
 ''' Mutation field definitions for GraphQL server '''
 class CreateUserStatusMutation(graphene.Mutation):
@@ -69,7 +86,6 @@ class CreateUserStatusMutation(graphene.Mutation):
     user_status = graphene.Field(UserStatusNode)
 
     @staticmethod
-    # def mutate(root, args, context, info, text=None):
     def mutate(root, info, text=None):
         if not info.context['user'].is_authenticated():
             return CreateUserStatusMutation(req_status=403)
@@ -87,7 +103,6 @@ class CreateUserStatusMutation(graphene.Mutation):
             text=text,
         )
 
-        # instead of user_status=obj, shouldn't it be user_status=node..?
         return CreateUserStatusMutation(
             req_status=200,
             form_errors=None,
