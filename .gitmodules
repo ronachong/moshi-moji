@@ -1,9 +1,9 @@
 [submodule "frontend"]
 	path = frontend
-	url = https://github.com/ronachong/moshimoji-frontend/
+	url = git@github.com:ronachong/moshimoji-frontend.git
 [submodule "backend"]
 	path = backend
-	url = https://github.com/ronachong/moshimoji-backend
+	url = git@github.com:ronachong/moshimoji-backend.git
 [submodule "nginx"]
 	path = nginx
 	url = git@github.com:ronachong/moshimoji-nginx.git
