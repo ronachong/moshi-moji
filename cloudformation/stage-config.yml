@@ -1,0 +1,22 @@
+# https://docs.docker.com/docker-for-aws/#configuration
+# https://docs.docker.com/docker-for-aws/persistent-data-volumes/#shared-cloudstor-volumes
+
+# TODO: convert to an actual yaml file or jinja template if desired
+
+"Stack name": "moshimoji-{}" # moshimoji-stage
+"Number of Swarm managers?": {} # 1 for stage, 3 for prod
+"Number of Swarm worker nodes?": # 0 for stage, ? for prod
+"Which SSH key to use?": "admin-mmprod-key-pair" # use different ones if needed for security
+"Enable daily resource cleanup?": # yes, I guess, if I automate things?
+"Use Cloudwatch for container logging?": # yes, if there's no cost? free tier
+"Create EFS prerequsities for CloudStor?": # no, EFS isn't ideal for low latency, high iops like for dbs, apprently
+"Swarm manager instance type?": # t2.micro for free tier
+"Manager ephemeral storage volume size?": # default 20
+"Manager ephemeral storage volume type": # default standard
+"Agent worker instance type?": # t2.micro for free tier
+"Worker ephemeral storage volume size?": # default of 20
+"Worker ephemeral storage volume type": # default of standard
+"Enable EBS I/O optimization?": # going with yes since I think I'm using EBS for my storage volumes
+
+# no tag key-value pairs
+# no iam
