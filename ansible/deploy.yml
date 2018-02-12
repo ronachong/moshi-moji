@@ -1,0 +1,19 @@
+
+# Play 1
+- hosts: '{{env}}-manager'
+  tasks:
+
+  - name: Re-deploy moshimoji stack
+    shell: docker stack deploy -c '/home/docker/compose-stack-{{env}}.yml' moshimoji-stack
+
+  - name: Check services
+    shell: docker service ls
+    register: out
+
+  - debug: var=out.stdout_lines
+
+- name: "Playbook: db-migrate"
+  import_playbook: db-migrate.yml "{{ env }}"
+  when:
+    - new_db is defined
+    - new_db
