@@ -1,0 +1,95 @@
+# most parameters should be statically specified here;
+# only use string injection for parameters that will differ b/w stage and prod
+
+version: "3.1" # makes yml compatible w/ swarm mode
+
+services:
+  nginx:
+    image: rochong/moshimoji-nginx:latest
+    ports:
+      - "80:80"
+    deploy:
+      replicas: {{ n_replicas_nginx }}
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 500M
+      restart_policy:
+        condition: on-failure
+    networks:
+      - moshimoji-net
+
+  frontend:
+    image: {{ frontend_image }}
+    ports:
+      - "4000:4000" # ReactQL app served on p 4000
+    deploy:
+      replicas: {{ n_replicas_frontend }}
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 500M  # TODO: think in terms of micro instances - is this ok?
+      restart_policy:
+        condition: on-failure
+    networks:
+      - moshimoji-net
+
+  backend:
+    image: rochong/moshimoji-be:latest
+    ports:
+      - "8001:8001" # Django app served on p 8001 by uwsgi
+    environment:
+      - STAGE={{ stage_bool }}
+    secrets:
+      - DJANGO
+      - DB_PASSWORD
+      - DB_USERNAME
+      - DB_NAME
+    deploy:
+      replicas: {{ n_replicas_backend }}
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 500M  # TODO: think in terms of micro instances - is this ok?
+      restart_policy:
+        condition: on-failure
+    networks:
+      - moshimoji-net
+
+  {% if stage_bool %}
+  database:
+    image: postgres:9.5.10
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD_FILE: '/run/secrets/DB_PASSWORD'
+      POSTGRES_USER_FILE: '/run/secrets/DB_USERNAME'
+      POSTGRES_DB_FILE: '/run/secrets/DB_NAME'
+    secrets:
+      - DB_PASSWORD
+      - DB_USERNAME
+      - DB_NAME
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 500M  # TODO: think in terms of micro instances - is this ok?
+      restart_policy:
+        condition: on-failure
+    networks:
+      - moshimoji-net
+  {% endif %}
+
+secrets:
+  DJANGO:
+    file: '/home/docker/secrets/DJANGO'
+  DB_PASSWORD:
+    file: '/home/docker/secrets/DB_PASSWORD'
+  DB_USERNAME:
+    file: '/home/docker/secrets/DB_USERNAME'
+  DB_NAME:
+    file: '/home/docker/secrets/DB_NAME'
+
+networks:
+  moshimoji-net:
