@@ -1,0 +1,7 @@
+- debug: msg="Make sure to be logged into docker hub first, otherwise this may fail"
+
+- name: Pull new node-kwsfe image
+  shell: sudo docker pull "rochong/moshimoji-fe:latest-{{ image_env|upper }}"
+  register: out
+
+- debug: var=out

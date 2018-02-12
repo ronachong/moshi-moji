@@ -1,0 +1,12 @@
+- name: Move current compose to prev file
+  shell: mv '/home/docker/compose-stack-{{ env }}.yml' '/home/docker/compose-stack-{{ env }}.prev'
+
+- name: Push compose
+  copy: src='/home/rona/projects/moshimoji/docker/compose/compose-stack-{{ env }}.yml' dest='/home/docker/compose-stack-{{ env }}.yml'
+
+- name: Compare previous compose with new
+  shell: diff '/home/docker/compose-stack-{{ env }}.prev' '/home/docker/compose-stack-{{ env }}.yml'
+  register: compose_output
+  failed_when: compose_output.rc > 1
+
+- debug: var=compose_output.stdout_lines

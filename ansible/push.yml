@@ -1,0 +1,65 @@
+- name: "Build artifacts"
+  import_playbook: build.yml "{{ compose }}" "{{ uwsgi_gdbe }}" "{{ node_kwsfe }}" node_kwsfe_env="{{ env }}"
+  when: build is defined
+
+# Play 1
+- name: "Push docker images to docker hub"
+  hosts: localhost
+  tasks:
+    - name: "Invoke role:push-node-kwsfe"
+      include_role:
+        name: push-node-kwsfe
+      vars:
+        image_tag: "{{ node_kwsfe }}"
+        image_env: "{{ env }}"
+      when:
+        - node_kwsfe is defined
+        - node_kwsfe
+
+    - name: "Invoke role: push-uwsgi-gdbe"
+      include_role:
+        name: push-uwsgi-gdbe
+      vars:
+        image_tag: "{{ uwsgi_gdbe }}"
+      when:
+        - env is defined
+        - uwsgi_gdbe is defined
+        - uwsgi_gdbe
+
+# Play 2
+- name: "Pull images and/or push other artifacts to swarm managers"
+  hosts: '{{ env }}-manager'
+  tasks:
+    - name: "Invoke role: pull-node-kwsfe"
+      include_role:
+        name: pull-node-kwsfe
+      vars:
+        image_env: "{{ env }}"
+      when:
+        - env is defined
+        - node_kwsfe is defined
+        - node_kwsfe
+
+    - name: "Invoke role: pull-uwsgi-gdbe"
+      include_role:
+        name: pull-uwsgi-gdbe
+      when:
+        - uwsgi_gdbe is defined
+        - uwsgi_gdbe
+
+    - name: "Invoke role: push-compose"
+      include_role:
+        name: push-compose
+      when:
+        - compose is defined
+        - compose
+
+    - name: "Invoke role: push-secrets"
+      include_role:
+        name: push-secrets
+      vars:
+        env: "{{ env }}"
+      when:
+        - env is defined
+        - secrets is defined
+        - secrets
