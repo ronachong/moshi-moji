@@ -1,0 +1,29 @@
+# Play 1
+- hosts: localhost
+  tasks:
+  - name: "Invoke role: build-compose"
+    include_role:
+      name: build-compose
+    when:
+      - compose is defined
+      - compose
+
+  - name: "Invoke role: build-node-kwsfe"
+    include_role:
+      name: build-node-kwsfe
+    vars:
+      image_tag: "{{ node_kwsfe }}"
+      image_env: "{{ node_kwsfe_env }}"
+    when:
+      - node_kwsfe is defined
+      - node_kwsfe
+      - node_kwsfe_env == "stage" || node_kwsfe_env == "prod"
+
+  - name: "Invoke role: build-uwsgi-gdbe"
+    include_role:
+      name: build-uwsgi-gdbe
+    vars:
+      image_tag: "{{ uwsgi_gdbe }}"
+    when:
+      - uwsgi_gdbe is defined
+      - uwsgi_gdbe

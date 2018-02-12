@@ -1,0 +1,5 @@
+- name: Generate new compose files from template
+  shell: python /home/rona/projects/moshimoji/docker/compose/generate_compose.py
+  register: out
+
+- debug: var=out.stdout_lines

@@ -1,0 +1,13 @@
+- debug: msg="rochong/moshimoji-fe:{{ image_tag }}-{{ image_env|upper }}"
+
+- name: Build new docker image for koa webserver (node) frontend for stage
+  shell: docker build /home/rona/projects/moshimoji-frontend -f /home/rona/projects/moshimoji/docker/Dockerfiles/node-kwsfe-Dockerfile -t "rochong/moshimoji-fe:{{ image_tag }}-{{ image_env|upper }}" --build-arg STAGE={{ 'true' if image_env=="stage" else 'false'}}
+  register: out
+
+- debug: var=out.stdout_lines
+
+- name: Tag newest docker image for koa webserver (node) frontend as latest
+  shell: docker tag "rochong/moshimoji-fe:{{ image_tag }}-{{ image_env|upper }}" "rochong/moshimoji-fe:latest-{{ image_env|upper }}"
+  register: out
+
+- debug: var=out.stdout_lines

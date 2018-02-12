@@ -1,0 +1,11 @@
+- name: Build new docker image for uwsgi graphene-django backend
+  shell: docker build /home/rona/projects/moshimoji-backend -f /home/rona/projects/moshimoji/docker/Dockerfiles/uwsgi-gdbe-Dockerfile -t "rochong/moshimoji-be:{{ image_tag }}"
+  register: out
+
+- debug: var=out.stdout_lines
+
+- name: Tag newest docker image for uwsgi graphene-django backend as latest
+  shell: docker tag "rochong/moshimoji-be:{{ image_tag }}" rochong/moshimoji-be:latest
+  register: out
+
+- debug: var=out.stdout_lines
