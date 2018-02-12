@@ -1,0 +1,28 @@
+# Play 1
+- name: "Provisioning for all nodes"
+  hosts: swarm-nodes
+  gather_facts: no
+  tasks:
+    - name: Install python3(.5.2)
+      raw: sudo apk add --update python3
+
+    - name: Test regular ansible function
+      ping:
+
+    - name: Install emacs!! (woot)
+      raw: sudo apk add --update emacs
+
+    # - name: Create facts directories
+    #   shell: mkdir /etc/ansible && mkdir /etc/ansible/facts.d
+
+# Play 2
+- name: "Provisioning for chosen swarm managers"
+  hosts: swarm-managers
+  gather_facts: no
+  tasks:
+    - name: Creates dirs necessary to avoid initial push errors
+      shell: mkdir /home/docker/prev-secrets /home/docker/secrets
+
+
+# TODO: implement the following to avoid errors for first pushes
+#     - name: Create compose file
