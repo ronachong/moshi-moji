@@ -1,0 +1,19 @@
+# Play 1
+- name: "Check migrations"
+  hosts: '{{ env }}-manager'
+  tasks:
+    - name: "Role: migrations-show"
+      include_role:
+        name: migrations-show
+
+# Play 2
+- name: "Run migrations"
+  hosts: '{{ env }}-manager'
+  vars_prompt:
+    - name: "run_migrate"
+      prompt: "run migrate? input yes or no"
+  tasks:
+    - name: "Role: migrate"
+      include_role:
+        name: migrate
+      when: run_migrate=="yes"
