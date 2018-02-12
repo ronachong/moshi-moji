@@ -1,0 +1,32 @@
+- name: "Backup data"
+  hosts: localhost
+  tasks:
+    - name: "Dump data"
+      shell: pg_dump -h localhost -U mmuser moshimoji > moshimoji.sql
+
+- name: "Push data and restore from data"
+  hosts: 'stage-manager'
+  tasks:
+    - name: "Move dump to stage manager"
+      copy: src=moshimoji.sql dest=/home/docker
+
+    - name: "Get postgres container id"
+      shell: docker ps | awk '$2=="postgres:9.5.10" { print $1 }'
+      register: dps_out
+
+    - debug: msg="dps - {{ dps_out.stdout }}"
+
+    - name: "Copy to container"
+      vars:
+        container: "{{ dps_out.stdout }}"
+      shell: docker cp /home/docker/moshimoji.sql {{ container }}:/home/moshimoji.sql
+
+    - name: "Push sql"
+      vars:
+        DB_USERNAME: "{{ lookup('file', '/home/rona/projects/moshimoji/docker/secrets/DB_USERNAME') }}"
+        DB_PASSWORD: "{{ lookup('file', '/home/rona/projects/moshimoji/docker/secrets/DB_PASSWORD') }}"
+        container: "{{ dps_out.stdout }}"
+      # shell: "docker exec {{ container }} \
+      # psql -U {{ DB_USERNAME.rstrip() }} moshimoji < /home/docker/moshimoji.sql"
+      shell: "docker exec {{ container }} \
+      bash -c 'PGPASSWORD={{ DB_PASSWORD.rstrip() }} psql -U {{ DB_USERNAME.rstrip() }} moshimoji < /home/moshimoji.sql'"
