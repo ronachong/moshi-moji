@@ -1,0 +1,31 @@
+#[local]
+#localhost         ansible_python_interpreter=/home/rona/miniconda3/envs/graphene-pr/bin/python
+
+[stage-manager]
+mm-stage-manager
+
+[stage:children]
+stage-manager
+
+[prod-managers]
+mm-prod-manager1
+mm-prod-manager2
+mm-prod-manager3
+
+[prod-manager]
+# arbitrarily chosen
+mm-prod-manager1
+
+[prod:children]
+prod-managers
+
+[swarm-nodes:children]
+stage
+prod
+
+[swarm-nodes:vars]
+ansible_python_interpreter=/usr/bin/python3
+
+[swarm-managers:children]
+stage-manager
+prod-managers
