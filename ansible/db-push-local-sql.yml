@@ -1,0 +1,5 @@
+- name: "Push data"
+  hosts: '{{ env }}-manager'
+  tasks:
+    - name: "Move dump to swarm manager"
+      copy: src=moshimoji.sql dest=/home/docker
