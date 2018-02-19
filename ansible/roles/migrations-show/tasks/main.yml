@@ -1,9 +1,9 @@
 - debug: msg="This may not work if there's more than one replica of the be."
 
-- name: Run migrate
-  shell: "docker exec $(docker container ps -qf ancestor=rochong/moshimoji-be:latest| awk '{ print $1 }' ) \
+- name: Run showmigrations
+  shell: "docker exec {{ backend_task }} \
   bash -c 'source activate uwsgi-gdbe-cenv && \
-  DJANGO_SETTINGS_MODULE=config.settings.stage /home/docker/code/graphene-django-backend/manage.py migrate'"
+  DJANGO_SETTINGS_MODULE=config.settings.{{ 'production' if env=='prod' else env }} /home/docker/code/graphene-django-backend/manage.py migrate'"
   register: out
 
 - debug: var=out

@@ -1,0 +1,13 @@
+- name: Check if backend is on node
+  shell: docker container ps | grep rochong/moshimoji-be:latest | awk '{ print $1}'
+  register: ps_out
+
+- set_fact:
+    backend_task: "{{ ps_out.stdout }}"
+  when: ps_out.stdout
+
+- debug: msg="No backend found on node; skipping"
+  when: backend_task is not defined
+
+- debug: msg="Backend found on node - {{ backend_task }}"
+  when: backend_task is defined

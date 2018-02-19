@@ -1,14 +1,19 @@
 # Play 1
 - name: "Check migrations"
-  hosts: '{{ env }}-manager'
+  hosts: '{{ env }}'
   tasks:
+    - name: "Check that node is hosting backend task"
+      include_role:
+        name: check-backend-on-node
+
     - name: "Role: migrations-show"
       include_role:
         name: migrations-show
+      when: backend_task is defined
 
 # Play 2
 - name: "Run migrations"
-  hosts: '{{ env }}-manager'
+  hosts: '{{ env }}'
   vars_prompt:
     - name: "run_migrate"
       prompt: "run migrate? input yes or no"
@@ -16,4 +21,8 @@
     - name: "Role: migrate"
       include_role:
         name: migrate
-      when: run_migrate=="yes"
+      vars:
+        env: "{{ env }}"
+      when:
+        - run_migrate=="yes"
+        - backend_task is defined
