@@ -20,3 +20,6 @@
         SQL_FILE: "{{ '/home/rona/projects/moshimoji/ansible/moshimoji.sql' if env=='stage' else '/home/docker/moshimoji.sql' }}"
       shell:
         "PGPASSWORD={{ DB_PASSWORD }} psql -h {{ DB_ENDPOINT }} -U {{ DB_USERNAME }} {{ DB_NAME }} < {{ SQL_FILE }}"
+      register: psql_out
+
+    - debug: var=psql_out.stdout_lines

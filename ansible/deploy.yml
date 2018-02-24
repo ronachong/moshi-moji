@@ -1,6 +1,5 @@
-
-# Play 1
-- hosts: '{{env}}-manager'
+- name: "Play: run deploy"
+  hosts: '{{ env }}-manager'
   tasks:
 
   - name: Re-deploy moshimoji stack
@@ -12,8 +11,16 @@
 
   - debug: var=out.stdout_lines
 
+- name: "Play: check whether to run db-migrate playbook"
+  hosts: localhost
+  vars_prompt:
+    - name: "run_migrate_playbook"
+      prompt: |
+        run migrate playbook?
+        NOTE: for safety we also require new_db to be passed as an extra-var in order to migrate prod.
+        ENTER to continue, ^C to stop
+
 - name: "Playbook: db-migrate"
-  import_playbook: db-migrate.yml "{{ env }}"
+  import_playbook: db-migrate.yml "{{ env }}" "{{ new_db if new_db is defined else ''}}"
   when:
-    - new_db is defined
-    - new_db
+    - env=='stage' or new_db is defined

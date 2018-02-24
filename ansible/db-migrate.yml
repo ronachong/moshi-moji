@@ -1,5 +1,4 @@
-# Play 1
-- name: "Check migrations"
+- name: "Play: check migrations"
   hosts: '{{ env }}'
   tasks:
     - name: "Check that node is hosting backend task"
@@ -11,8 +10,7 @@
         name: migrations-show
       when: backend_task is defined
 
-# Play 2
-- name: "Run migrations"
+- name: "Play: run migrations"
   hosts: '{{ env }}'
   vars_prompt:
     - name: "run_migrate"
@@ -26,3 +24,17 @@
       when:
         - run_migrate=="yes"
         - backend_task is defined
+
+- name: "Play: check whether to run db-sync playbook"
+  hosts: localhost
+  vars_prompt:
+    - name: "run_db_sync_playbook"
+      prompt: |
+        run db-sync playbook?
+        NOTE: For safety we also require new_db to be passed as an extra-var in order to sync data to prod.
+        ENTER to continue, ^C to stop
+
+- name: "Playbook: db-sync"
+  import_playbook: db-sync.yml "{{ env }}" "{{ new_db if new_db is defined else '' }}"
+  when:
+    - env=='stage' or new_db is defined
