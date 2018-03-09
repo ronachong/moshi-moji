@@ -1,0 +1,13 @@
+- debug: msg="Make sure to be logged into docker hub first, otherwise this may fail"
+
+- name: Push new koa webserver (node) image w/ actual tag
+  shell: sudo docker push "rochong/moshimoji-nginx:{{ image_tag }}"
+  register: out
+
+- debug: var=out
+
+- name: Push new koa webserver (node) image w/ latest tag
+  shell: sudo docker push "rochong/moshimoji-nginx:latest"
+  register: out
+
+- debug: var=out

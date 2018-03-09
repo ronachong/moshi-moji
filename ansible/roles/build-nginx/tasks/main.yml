@@ -1,0 +1,13 @@
+- debug: msg="rochong/moshimoji-nginx:{{ image_tag }}"
+
+- name: Build new docker image for nginx
+  shell: docker build /home/rona/projects/moshimoji-nginx -f /home/rona/projects/moshimoji/docker/Dockerfiles/nginx-Dockerfile -t "rochong/moshimoji-nginx:{{ image_tag }}"
+  register: out
+
+- debug: var=out.stdout_lines
+
+- name: Tag newest docker image for nginx as latest
+  shell: docker tag "rochong/moshimoji-nginx:{{ image_tag }}" "rochong/moshimoji-nginx:latest"
+  register: out
+
+- debug: var=out.stdout_lines

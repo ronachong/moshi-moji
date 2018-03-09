@@ -8,6 +8,15 @@
       - compose is defined
       - compose
 
+  - name: "Invoke role: build-nginx"
+    include_role:
+      name: build-nginx
+    vars:
+      image_tag: "{{ nginx }}"
+    when:
+      - nginx is defined
+      - nginx
+
   - name: "Invoke role: build-node-kwsfe"
     include_role:
       name: build-node-kwsfe

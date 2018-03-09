@@ -1,11 +1,21 @@
 - name: "Build artifacts"
-  import_playbook: build.yml "{{ compose }}" "{{ uwsgi_gdbe }}" "{{ node_kwsfe }}" node_kwsfe_env="{{ env }}"
+  import_playbook: build.yml "{{ compose }}" "{{nginx }}" "{{ uwsgi_gdbe }}" "{{ node_kwsfe }}" node_kwsfe_env="{{ env }}"
   when: build is defined
 
 # Play 1
 - name: "Push docker images to docker hub"
   hosts: localhost
   tasks:
+    - name: "Invoke role:push-nginx"
+      include_role:
+        name: push-nginx
+      vars:
+        image_tag: "{{ nginx }}"
+      when:
+        - env is defined
+        - nginx is defined
+        - nginx
+
     - name: "Invoke role:push-node-kwsfe"
       include_role:
         name: push-node-kwsfe
