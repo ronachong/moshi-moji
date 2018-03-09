@@ -40,11 +40,12 @@ services:
       - "8001:8001" # Django app served on p 8001 by uwsgi
     environment:
       - STAGE=0
-    secrets:
+    secrets: # TODO: pull this from a config or file that gdbe uses for Secrets.list too
       - DJANGO
       - DB_PASSWORD
       - DB_USERNAME
       - DB_NAME
+      - DB_ENDPOINT
     deploy:
       replicas: 1
       resources:
@@ -67,6 +68,8 @@ secrets:
     file: '/home/docker/secrets/DB_USERNAME'
   DB_NAME:
     file: '/home/docker/secrets/DB_NAME'
+  DB_ENDPOINT:
+    file: '/home/docker/secrets/DB_ENDPOINT'
 
 networks:
   moshimoji-net:
