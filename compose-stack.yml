@@ -1,0 +1,36 @@
+# most parameters should be statically specified here;
+# only use string injection for parameters that will differ b/w stage and prod
+
+version: "3" # makes yml compatible w/ swarm mode
+services:
+  frontend:
+    image: rochong/moshimoji-fe:latest
+    ports:
+      - "80:4000" # ReactQL app currently configured to be served on p 4000
+    deploy:
+      replicas: 1       # TODO: {{ vars['frontend_replicas'] }}
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 500M  # TODO: think in terms of micro instances - is this ok?
+      restart_policy:
+        condition: on-failure
+    networks:
+      - moshimoji-net
+
+  backend:
+    image: rochong/moshimoji-be:latest
+    ports:
+      - "8000:80" # Django app currently served on p 80 by Nginx
+    deploy:
+      replicas: 1       # TODO: {{ vars['backend_replicas'] }}
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 500M  # TODO: think in terms of micro instances - is this ok?
+      restart_policy:
+        condition: on-failure
+    networks:
+      - moshimoji-net
+networks:
+  moshimoji-net:

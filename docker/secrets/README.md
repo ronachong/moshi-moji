@@ -1,0 +1,1 @@
+This directory exists to house secrets for moshimoji.
